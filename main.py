@@ -8,6 +8,7 @@ from config import cfg
 from utils import load_data
 from capsNet import CapsNet
 
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 def save_to():
     if not os.path.exists(cfg.results):

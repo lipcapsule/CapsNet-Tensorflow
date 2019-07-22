@@ -45,8 +45,8 @@ class CapsLayer(object):
 
             if not self.with_routing:
                 # the PrimaryCaps layer, a convolutional layer
-                # input: [batch_size, 20, 20, 256]
-                # assert input.get_shape() == [cfg.batch_size, 20, 20, 256]
+                # input: [batch_size, 10, 10, 256] # changed 20 to 10 for system load
+                # assert input.get_shape() == [cfg.batch_size, 10, 10, 256] # changed 20 to 10 for system load
 
                 # NOTE: I can't find out any words from the paper whether the
                 # PrimaryCap convolution does a ReLU activation or not before
@@ -60,14 +60,14 @@ class CapsLayer(object):
                 #                                    activation_fn=None)
                 capsules = tf.reshape(capsules, (cfg.batch_size, -1, self.vec_len, 1))
 
-                # return tensor with shape [batch_size, 1152, 8, 1]
+                # return tensor with shape [batch_size, 1152, 4, 1] # changed 8 to 4 for system load
                 capsules = squash(capsules)
                 return(capsules)
 
         if self.layer_type == 'FC':
             if self.with_routing:
                 # the DigitCaps layer, a fully connected layer
-                # Reshape the input into [batch_size, 1152, 1, 8, 1]
+                # Reshape the input into [batch_size, 1152, 1, 4, 1] # changed 8 to 4 for system load
                 self.input = tf.reshape(input, shape=(cfg.batch_size, -1, 1, input.shape[-2].value, 1))
 
                 with tf.variable_scope('routing'):
@@ -84,7 +84,7 @@ def routing(input, b_IJ, num_outputs=10, num_dims=16):
     ''' The routing algorithm.
 
     Args:
-        input: A Tensor with [batch_size, num_caps_l=1152, 1, length(u_i)=8, 1]
+        input: A Tensor with [batch_size, num_caps_l=1152, 1, length(u_i)=4, 1] # changed 8 to 4 for system load
                shape, num_caps_l meaning the number of capsule in the layer l.
         num_outputs: the number of output capsules.
         num_dims: the number of dimensions for output capsule.

@@ -5,6 +5,7 @@ E-mail: naturomics.liao@gmail.com
 """
 
 import tensorflow as tf
+import os 
 
 from config import cfg
 from utils import get_batch_data
@@ -13,11 +14,13 @@ from utils import reduce_sum
 from capsLayer import CapsLayer
 
 
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
 epsilon = 1e-9
 
 
 class CapsNet(object):
-    def __init__(self, is_training=True, height=280, width=280, channels=1, num_label=10):  # changed from 28 to 280
+    def __init__(self, is_training=True, height=128, width=128, channels=1, num_label=10):  # changed from 28 to 128
         """
         Args:
             height: Integer, the height of inputs.
