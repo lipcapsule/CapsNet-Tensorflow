@@ -45,8 +45,8 @@ class CapsLayer(object):
 
             if not self.with_routing:
                 # the PrimaryCaps layer, a convolutional layer
-                # input: [batch_size, 10, 10, 256] # changed 20 to 10 for system load
-                # assert input.get_shape() == [cfg.batch_size, 10, 10, 256] # changed 20 to 10 for system load
+                # input: [batch_size, 10, 10, 64] # changed 20 to 10 & changed 256 to 64 for system load
+                # assert input.get_shape() == [cfg.batch_size, 10, 10, 64] # changed 20 to 10 & changed 256 to 64 for system load
 
                 # NOTE: I can't find out any words from the paper whether the
                 # PrimaryCap convolution does a ReLU activation or not before
@@ -80,7 +80,7 @@ class CapsLayer(object):
             return(capsules)
 
 
-def routing(input, b_IJ, num_outputs=10, num_dims=16):
+def routing(input, b_IJ, num_outputs=10, num_dims=8): # changed 16 to 8 for system load
     ''' The routing algorithm.
 
     Args:
@@ -89,7 +89,7 @@ def routing(input, b_IJ, num_outputs=10, num_dims=16):
         num_outputs: the number of output capsules.
         num_dims: the number of dimensions for output capsule.
     Returns:
-        A Tensor of shape [batch_size, num_caps_l_plus_1, length(v_j)=16, 1]
+        A Tensor of shape [batch_size, num_caps_l_plus_1, length(v_j)=8, 1] # changed 16 to 8 for system load
         representing the vector output `v_j` in the layer l+1
     Notes:
         u_i represents the vector output of capsule i in the layer l, and
@@ -109,11 +109,9 @@ def routing(input, b_IJ, num_outputs=10, num_dims=16):
     # element-wise multiply [a*c, b] * [a*c, b], reduce_sum at axis=1 and
     # reshape to [a, c]
     input = tf.tile(input, [1, 1, num_dims * num_outputs, 1, 1])
-    # assert input.get_shape() == [cfg.batch_size, 1152, 160, 8, 1]
 
     u_hat = reduce_sum(W * input, axis=3, keepdims=True)
     u_hat = tf.reshape(u_hat, shape=[-1, input_shape[1], num_outputs, num_dims, 1])
-    # assert u_hat.get_shape() == [cfg.batch_size, 1152, 10, 16, 1]
 
     # In forward, u_hat_stopped = u_hat; in backward, no gradient passed back from u_hat_stopped to u_hat
     u_hat_stopped = tf.stop_gradient(u_hat, name='stop_gradient')
@@ -122,14 +120,12 @@ def routing(input, b_IJ, num_outputs=10, num_dims=16):
     for r_iter in range(cfg.iter_routing):
         with tf.variable_scope('iter_' + str(r_iter)):
             # line 4:
-            # => [batch_size, 1152, 10, 1, 1]
             c_IJ = softmax(b_IJ, axis=2)
 
             # At last iteration, use `u_hat` in order to receive gradients from the following graph
             if r_iter == cfg.iter_routing - 1:
                 # line 5:
                 # weighting u_hat with c_IJ, element-wise in the last two dims
-                # => [batch_size, 1152, 10, 16, 1]
                 s_J = tf.multiply(c_IJ, u_hat)
                 # then sum in the second dim, resulting in [batch_size, 1, 10, 16, 1]
                 s_J = reduce_sum(s_J, axis=1, keepdims=True) + biases

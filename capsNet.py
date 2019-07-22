@@ -58,8 +58,8 @@ class CapsNet(object):
 
     def build_arch(self):
         with tf.variable_scope('Conv1_layer'):
-            # Conv1, return tensor with shape [batch_size, 20, 20, 256]
-            conv1 = tf.contrib.layers.conv2d(self.X, num_outputs=256,
+            # Conv1, return tensor with shape [batch_size, 10, 10, 64]
+            conv1 = tf.contrib.layers.conv2d(self.X, num_outputs=64,
                                              kernel_size=9, stride=1,
                                              padding='VALID')
 
