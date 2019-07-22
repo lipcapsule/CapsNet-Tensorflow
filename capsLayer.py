@@ -1,7 +1,6 @@
 """
 License: Apache-2.0
-Author: Huadong Liao
-E-mail: naturomics.liao@gmail.com
+E-mail: aurelius@bu.edu
 """
 
 import numpy as np

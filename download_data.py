@@ -59,18 +59,13 @@ def start_download(dataset, save_to, force):
         download_and_uncompress_zip(MNIST_TRAIN_LABELS_URL, save_to, force)
         download_and_uncompress_zip(MNIST_TEST_IMGS_URL, save_to, force)
         download_and_uncompress_zip(MNIST_TEST_LABELS_URL, save_to, force)
-    elif dataset == 'fashion-mnist':
-        download_and_uncompress_zip(FASHION_MNIST_TRAIN_IMGS_URL, save_to, force)
-        download_and_uncompress_zip(FASHION_MNIST_TRAIN_LABELS_URL, save_to, force)
-        download_and_uncompress_zip(FASHION_MNIST_TEST_IMGS_URL, save_to, force)
-        download_and_uncompress_zip(FASHION_MNIST_TEST_LABELS_URL, save_to, force)
     else:
         raise Exception("Invalid dataset name! please check it: ", dataset)
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser('Script for automatically downloading datasets')
-    parser.add_argument("--dataset", default='mnist', choices=['mnist', 'fashion-mnist', 'smallNORB'])
+    parser.add_argument("--dataset", default='mnist', choices=['mnist'])
     save_to = os.path.join('data', 'mnist')
     parser.add_argument("--save_to", default=save_to)
     parser.add_argument("--force", default=False, type=bool)
