@@ -2,8 +2,8 @@ import os
 import sys
 import numpy as np
 import tensorflow as tf
-from tqdm import tqdm
 
+from tqdm import tqdm
 from config import cfg
 from utils import load_data
 from capsNet import CapsNet

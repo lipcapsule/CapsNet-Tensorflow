@@ -19,7 +19,7 @@ flags.DEFINE_float('m_minus', 0.1, 'the parameter of m minus')
 flags.DEFINE_float('lambda_val', 0.5, 'down weight of the loss for absent digit classes')
 
 # for training
-flags.DEFINE_integer('batch_size', 2, 'batch size') # changed from 128 to 4
+flags.DEFINE_integer('batch_size', 1, 'batch size') # changed from 128 to 1
 flags.DEFINE_integer('epoch', 1, 'epoch') # changed from 50 to 1 
 flags.DEFINE_integer('iter_routing', 3, 'number of iterations in routing algorithm')
 flags.DEFINE_boolean('mask_with_y', True, 'use the true label to mask out target capsule or not')
@@ -44,7 +44,7 @@ flags.DEFINE_string('results', 'results', 'path for saving results')
 #   distributed setting    #
 ############################
 flags.DEFINE_integer('num_gpu', 1, 'number of gpus for distributed training')
-flags.DEFINE_integer('batch_size_per_gpu', 2, 'batch size on 1 gpu') # changed 128 to 2
+flags.DEFINE_integer('batch_size_per_gpu', 1, 'batch size on 1 gpu') # changed 128 to 1
 flags.DEFINE_integer('thread_per_gpu', 1, 'Number of preprocessing threads per tower.')
 
 cfg = tf.app.flags.FLAGS
