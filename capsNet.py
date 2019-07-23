@@ -1,7 +1,7 @@
 """
 License: Apache-2.0
-Author: Huadong Liao
-E-mail: naturomics.liao@gmail.com
+Code by Huadong Liao parameters adjusted for MIRACL-VC1 dataset by Oliver Ellison
+E-mail: aurelius@bu.edu
 """
 
 import tensorflow as tf
@@ -147,7 +147,7 @@ class CapsNet(object):
         # The paper uses sum of squared error as reconstruction error, but we
         # have used reduce_mean in `# 2 The reconstruction loss` to calculate
         # mean squared error. In order to keep in line with the paper,the
-        # regularization scale should be 0.0005*784=0.392
+        # regularization scale should be 0.0005*16384=8.192
         self.total_loss = self.margin_loss + cfg.regularization_scale * self.reconstruction_err
 
     # Summary

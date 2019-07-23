@@ -1,5 +1,6 @@
 """
 License: Apache-2.0
+Code by Huadong Liao parameters adjusted for MIRACL-VC1 dataset by Oliver Ellison
 E-mail: aurelius@bu.edu
 """
 
@@ -45,8 +46,8 @@ class CapsLayer(object):
 
             if not self.with_routing:
                 # the PrimaryCaps layer, a convolutional layer
-                # input: [batch_size, 10, 10, 64] # changed 20 to 10 & changed 256 to 64 for system load
-                # assert input.get_shape() == [cfg.batch_size, 10, 10, 64] # changed 20 to 10 & changed 256 to 64 for system load
+                # input: [batch_size, 20, 20, 256]  
+                # assert input.get_shape() == [cfg.batch_size, 20, 20, 256]  
 
                 # NOTE: I can't find out any words from the paper whether the
                 # PrimaryCap convolution does a ReLU activation or not before
@@ -60,14 +61,14 @@ class CapsLayer(object):
                 #                                    activation_fn=None)
                 capsules = tf.reshape(capsules, (cfg.batch_size, -1, self.vec_len, 1))
 
-                # return tensor with shape [batch_size, 1152, 4, 1] # changed 8 to 4 for system load
+                # return tensor with shape [batch_size, 1152, 8, 1]  
                 capsules = squash(capsules)
                 return(capsules)
 
         if self.layer_type == 'FC':
             if self.with_routing:
                 # the DigitCaps layer, a fully connected layer
-                # Reshape the input into [batch_size, 1152, 1, 4, 1] # changed 8 to 4 for system load
+                # Reshape the input into [batch_size, 1152, 1, 8, 1]  
                 self.input = tf.reshape(input, shape=(cfg.batch_size, -1, 1, input.shape[-2].value, 1))
 
                 with tf.variable_scope('routing'):
@@ -80,16 +81,16 @@ class CapsLayer(object):
             return(capsules)
 
 
-def routing(input, b_IJ, num_outputs=10, num_dims=8): # changed 16 to 8 for system load
+def routing(input, b_IJ, num_outputs=10, num_dims=16):  
     ''' The routing algorithm.
 
     Args:
-        input: A Tensor with [batch_size, num_caps_l=1152, 1, length(u_i)=4, 1] # changed 8 to 4 for system load
+        input: A Tensor with [batch_size, num_caps_l=1152, 1, length(u_i)=8, 1]  
                shape, num_caps_l meaning the number of capsule in the layer l.
         num_outputs: the number of output capsules.
         num_dims: the number of dimensions for output capsule.
     Returns:
-        A Tensor of shape [batch_size, num_caps_l_plus_1, length(v_j)=8, 1] # changed 16 to 8 for system load
+        A Tensor of shape [batch_size, num_caps_l_plus_1, length(v_j)=16, 1]  
         representing the vector output `v_j` in the layer l+1
     Notes:
         u_i represents the vector output of capsule i in the layer l, and
