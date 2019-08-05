@@ -1,9 +1,10 @@
 """
 License: Apache-2.0
-Code by Huadong Liao parameters adjusted for MIRACL-VC1 dataset by Oliver Ellison
-E-mail: aurelius@bu.edu
+Author: Huadong Liao
+E-mail: naturomics.liao@gmail.com
 """
 
+import os
 import numpy as np
 import tensorflow as tf
 
@@ -11,6 +12,10 @@ from config import cfg
 from utils import reduce_sum
 from utils import softmax
 from utils import get_shape
+
+
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 epsilon = 1e-9
@@ -46,8 +51,8 @@ class CapsLayer(object):
 
             if not self.with_routing:
                 # the PrimaryCaps layer, a convolutional layer
-                # input: [batch_size, 20, 20, 256]  
-                # assert input.get_shape() == [cfg.batch_size, 20, 20, 256]  
+                # input: [batch_size, 20, 20, 256]
+                # assert input.get_shape() == [cfg.batch_size, 20, 20, 256]
 
                 # NOTE: I can't find out any words from the paper whether the
                 # PrimaryCap convolution does a ReLU activation or not before
@@ -61,14 +66,14 @@ class CapsLayer(object):
                 #                                    activation_fn=None)
                 capsules = tf.reshape(capsules, (cfg.batch_size, -1, self.vec_len, 1))
 
-                # return tensor with shape [batch_size, 1152, 8, 1]  
+                # return tensor with shape [batch_size, 1152, 8, 1]
                 capsules = squash(capsules)
                 return(capsules)
 
         if self.layer_type == 'FC':
             if self.with_routing:
                 # the DigitCaps layer, a fully connected layer
-                # Reshape the input into [batch_size, 1152, 1, 8, 1]  
+                # Reshape the input into [batch_size, 1152, 1, 8, 1]
                 self.input = tf.reshape(input, shape=(cfg.batch_size, -1, 1, input.shape[-2].value, 1))
 
                 with tf.variable_scope('routing'):
@@ -81,16 +86,16 @@ class CapsLayer(object):
             return(capsules)
 
 
-def routing(input, b_IJ, num_outputs=10, num_dims=16):  
+def routing(input, b_IJ, num_outputs=10, num_dims=16):
     ''' The routing algorithm.
 
     Args:
-        input: A Tensor with [batch_size, num_caps_l=1152, 1, length(u_i)=8, 1]  
+        input: A Tensor with [batch_size, num_caps_l=1152, 1, length(u_i)=8, 1]
                shape, num_caps_l meaning the number of capsule in the layer l.
         num_outputs: the number of output capsules.
         num_dims: the number of dimensions for output capsule.
     Returns:
-        A Tensor of shape [batch_size, num_caps_l_plus_1, length(v_j)=16, 1]  
+        A Tensor of shape [batch_size, num_caps_l_plus_1, length(v_j)=16, 1]
         representing the vector output `v_j` in the layer l+1
     Notes:
         u_i represents the vector output of capsule i in the layer l, and
@@ -110,9 +115,11 @@ def routing(input, b_IJ, num_outputs=10, num_dims=16):
     # element-wise multiply [a*c, b] * [a*c, b], reduce_sum at axis=1 and
     # reshape to [a, c]
     input = tf.tile(input, [1, 1, num_dims * num_outputs, 1, 1])
+    # assert input.get_shape() == [cfg.batch_size, 1152, 160, 8, 1]
 
     u_hat = reduce_sum(W * input, axis=3, keepdims=True)
     u_hat = tf.reshape(u_hat, shape=[-1, input_shape[1], num_outputs, num_dims, 1])
+    # assert u_hat.get_shape() == [cfg.batch_size, 1152, 10, 16, 1]
 
     # In forward, u_hat_stopped = u_hat; in backward, no gradient passed back from u_hat_stopped to u_hat
     u_hat_stopped = tf.stop_gradient(u_hat, name='stop_gradient')
@@ -121,12 +128,14 @@ def routing(input, b_IJ, num_outputs=10, num_dims=16):
     for r_iter in range(cfg.iter_routing):
         with tf.variable_scope('iter_' + str(r_iter)):
             # line 4:
+            # => [batch_size, 1152, 10, 1, 1]
             c_IJ = softmax(b_IJ, axis=2)
 
             # At last iteration, use `u_hat` in order to receive gradients from the following graph
             if r_iter == cfg.iter_routing - 1:
                 # line 5:
                 # weighting u_hat with c_IJ, element-wise in the last two dims
+                # => [batch_size, 1152, 10, 16, 1]
                 s_J = tf.multiply(c_IJ, u_hat)
                 # then sum in the second dim, resulting in [batch_size, 1, 10, 16, 1]
                 s_J = reduce_sum(s_J, axis=1, keepdims=True) + biases

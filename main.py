@@ -2,13 +2,15 @@ import os
 import sys
 import numpy as np
 import tensorflow as tf
-
 from tqdm import tqdm
+
 from config import cfg
 from utils import load_data
 from capsNet import CapsNet
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 
 def save_to():
     if not os.path.exists(cfg.results):
